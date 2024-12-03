@@ -1,18 +1,51 @@
 body {
-  margin: 0;
-  min-width: 320px;
+  margin: 0px;
   min-height: 100vh;
-  background-color: #f5f8fa;
 }
 
-.editable-cell-input {
-  border: none !important; /* Remove default border */
-  box-shadow: none !important; /* Remove default shadow */
-  background-color: transparent; /* Transparent background */
-  transition: box-shadow 0.3s ease, border 0.3s ease;
+.container {
+  background-color: #ebf5ffcc;
+  height: 100vh;
 }
 
-.editable-cell-input.bp3-input:focus {
-  border: 2px solid #137cbd !important; /* Focus border */
-  box-shadow: 0 0 5px #137cbd !important; /* Glow effect */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+table {
+  border: 1px solid lightgray;
+}
+
+tbody {
+  border-bottom: 1px solid lightgray;
+}
+
+th {
+  border-bottom: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+  padding: 2px 4px;
+}
+
+tfoot {
+  color: gray;
+}
+
+tfoot th {
+  font-weight: normal;
+}
+
+.table-input-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.my-toaster.bp4-toast-container {
+  top: 50% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: fixed !important;
 }

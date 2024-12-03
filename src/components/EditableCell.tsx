@@ -1,49 +1,51 @@
-import { InputGroup, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
-import React, { useEffect, useState } from "react";
-import { Row, Column, Table } from "@tanstack/react-table"; 
+import { InputGroup } from "@blueprintjs/core";
+import React, { useState } from "react";
+import { showErrorToast } from "./Toaster";
 
-interface Todo {
-    task: string;
-    status: string;
-    children?: Todo[];
-  }
+interface EditableCellProps {
+  value: string;
+  onSave: (newValue: string) => void;
+}
 
-interface StatusCellProps {
-    getValue: () => string;
-    row: Row<Todo>; 
-    column: Column<Todo, unknown>; 
-    table: Table<Todo>; 
-  }
+const EditableCell: React.FC<EditableCellProps> = ({ value, onSave }) => {
+  const [editingValue, setEditingValue] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
 
-const StatusCell: React.FC<StatusCellProps> = ({
-  getValue,
-  row,
-  column,
-  table,
-}) => {
-  const initialValue = getValue();
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  const handleClick = () => {
-    table.options.meta?.updateData(row.index, column.id, value);
+  const handleSaveCell = () => {
+    if (editingValue !== value) {
+      onSave(editingValue);
+    }
+    if (editingValue === "") {
+      showErrorToast("Field is required!")
+    }
+    setIsEditing(false);
   };
 
-  return (
-    <Menu>
-    <MenuItem icon="new-text-box" onClick={handleClick} text="New text box" />
-    <MenuItem icon="new-object" onClick={handleClick} text="New object" />
-    <MenuItem icon="new-link" onClick={handleClick} text="New link" />
-    <MenuDivider />
-    <MenuItem text="Settings..." icon="cog" intent="primary">
-        <MenuItem icon="tick" text="Save on edit" />
-        <MenuItem icon="blank" text="Compile on edit" />
-    </MenuItem>
-</Menu>
+  return isEditing ? (
+    <InputGroup
+      value={editingValue}
+      onChange={(e) => setEditingValue(e.target.value)}
+      style={{
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis",
+        border: "none",
+      }}
+      fill
+      onBlur={() => {
+        handleSaveCell();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleSaveCell();
+        }
+      }}
+    />
+  ) : (
+    <div onDoubleClick={() => setIsEditing(true)} style={{ width: "100%" }}>
+      {editingValue || value}
+    </div>
   );
 };
 
-export default StatusCell;
+export default EditableCell;

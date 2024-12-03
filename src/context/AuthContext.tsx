@@ -1,13 +1,20 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 interface User {
+  firstName: string;
+  lastName: string;
   email: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
-  signup: (email: string, password: string) => void;
+  saveUser: (user: User) => void;
   logout: () => void;
 }
 
@@ -15,27 +22,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const userData = localStorage.getItem("userData");
 
-  const login = (email: string, password: string): boolean => {
-    // Fake login for demonstration
-    if (email === "test@test.com" && password === "password") {
-      setUser({ email });
-      return true;
+  useEffect(() => {
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
-    return false;
+  }, [userData]);
+
+  const saveUser = (userData: User) => {
+    if (userData) {
+      setUser(userData);
+    }
   };
 
-  const signup = (email: string, password: string) => {
-    // Fake signup for demonstration
-    setUser({ email });
-  };
-
-  const logout = () => {
+  const logout = (): void => {
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userData");
     setUser(null);
+    window.location.href = "/login";
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, saveUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

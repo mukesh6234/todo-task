@@ -1,10 +1,22 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Card, FormGroup, InputGroup } from "@blueprintjs/core";
+import { api } from "../api/MakeRequest";
+import { showErrorToast, showSuccessToast } from "../components/Toaster";
+import { catchBlockError } from "../utils/helper";
+
+interface SignResponse {
+  message: string;
+  token: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
 
 const Signup: React.FC = () => {
-  // Profile data state
   const [profileData, setProfileData] = useState<{
     firstName: string;
     lastName: string;
@@ -17,35 +29,50 @@ const Signup: React.FC = () => {
     password: "",
   });
 
-  // Destructuring for cleaner JSX
   const { firstName, lastName, email, password } = profileData;
 
-  // Auth context and navigation
-  const { signup } = useAuth();
+  const { saveUser } = useAuth();
   const navigate = useNavigate();
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    signup(email, password);
-    navigate("/");
-  };
+    if (firstName && lastName && email && password) {
+      const reqBody = {
+        firstName,
+        lastName,
+        email,
+        password,
+      };
+      try {
+        const response = await api.post<SignResponse>(`/auth/signup`, reqBody);
+        console.log(response, "signup");
+        const { token, user } = response;
+        saveUser(user);
+        localStorage.setItem("jwtToken", token);
+        localStorage.setItem("userData", JSON.stringify(user));
+        showSuccessToast(response.message);
+        navigate("/");
+      } catch (err) {
+        catchBlockError(err);
+      }
+    } else {
+      showErrorToast("Invalid credentials");
+    }
+  }, []);
 
-  // Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-  };
+  }, []);
 
   return (
     <div className="auth-container">
       <Card elevation={2} style={{ width: 400 }}>
         <h2>Create New Account</h2>
         <form onSubmit={handleSubmit}>
-          {/* First Name */}
           <FormGroup label="First Name" labelFor="first-name-input">
             <InputGroup
               id="first-name-input"
@@ -56,7 +83,6 @@ const Signup: React.FC = () => {
               onChange={handleChange}
             />
           </FormGroup>
-          {/* Last Name */}
           <FormGroup label="Last Name" labelFor="last-name-input">
             <InputGroup
               id="last-name-input"
@@ -67,7 +93,6 @@ const Signup: React.FC = () => {
               onChange={handleChange}
             />
           </FormGroup>
-          {/* Email */}
           <FormGroup label="Email" labelFor="email-input">
             <InputGroup
               id="email-input"
@@ -78,7 +103,6 @@ const Signup: React.FC = () => {
               onChange={handleChange}
             />
           </FormGroup>
-          {/* Password */}
           <FormGroup label="Password" labelFor="password-input">
             <InputGroup
               id="password-input"
@@ -89,10 +113,8 @@ const Signup: React.FC = () => {
               onChange={handleChange}
             />
           </FormGroup>
-          {/* Submit Button */}
           <Button intent="primary" text="Sign Up" type="submit" />
         </form>
-        {/* Login Link */}
         <div style={{ marginTop: "10px" }}>
           Already have an account?{" "}
           <Link to="/login" className="bp3-button bp3-minimal">

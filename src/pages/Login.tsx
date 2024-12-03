@@ -1,46 +1,71 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Card, FormGroup, InputGroup } from "@blueprintjs/core";
+import { api } from "../api/MakeRequest";
+import { showErrorToast, showSuccessToast } from "../components/Toaster";
+import { catchBlockError } from "../utils/helper";
+import LoadingBackdrop from "../components/LoadingBackdrop";
+
+interface LoginResponse {
+  message: string;
+  token: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
 
 const Login: React.FC = () => {
-  // Profile data state
   const [authData, setAuthData] = useState<{
-  
     email: string;
     password: string;
   }>({
-   
     email: "",
     password: "",
   });
-
-  // Destructuring for cleaner JSX
-  const {  email, password } = authData;
-  const { login } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { email, password } = authData;
+  const { saveUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email, password)) {
+    if (!authData.email || !authData.password) {
+      showErrorToast("Invalid credentials");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const response = await api.put<LoginResponse>(`/auth/login`, authData);
+      const { token, user } = response;
+      showSuccessToast(response.message);
+      localStorage.setItem("jwtToken", token);
+      localStorage.setItem("userData", JSON.stringify(user));
+      saveUser(user);
       navigate("/");
-    } else {
-      alert("Invalid credentials");
+      setIsSubmitting(false);
+    } catch (err) {
+      catchBlockError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setAuthData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-  };
+  }, []);
 
   return (
     <div className="auth-container">
+      {isSubmitting && <LoadingBackdrop />}
       <Card elevation={2} style={{ width: 400 }}>
-        <h2>Login</h2>
+        <h2>Welcome back!</h2>
         <form onSubmit={handleSubmit}>
           <FormGroup label="Email" labelFor="email-input">
             <InputGroup
@@ -62,8 +87,14 @@ const Login: React.FC = () => {
               onChange={handleChange}
             />
           </FormGroup>
-          <Button intent="primary" text="Login" type="submit" />
+          <Button intent="primary" text="Login" type="submit" icon={"log-in"} />
         </form>
+        <div style={{ marginTop: "10px" }}>
+          Don't have an account?{" "}
+          <Link to="/signup" className="bp3-button bp3-minimal">
+            Signup
+          </Link>
+        </div>
       </Card>
     </div>
   );

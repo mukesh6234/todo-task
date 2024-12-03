@@ -1,15 +1,9 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import { Home, Login, Signup } from "./pages";
-import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
-
-// Protected Route Component
+import PublicRoute from "./components/PublicRoute";
 
 const App: React.FC = () => {
   return (
@@ -22,31 +16,25 @@ const App: React.FC = () => {
 };
 
 const MainContent: React.FC = () => {
-  const { user } = useAuth(); // Access the user state from AuthContext
-
   return (
-    <div>
-      {/* Show Navbar only when the user is logged in */}
-      {user && <Navbar />}
+    <>
       <div className="container">
         <Routes>
-          {/* Public Routes */}
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-
-          {/* Protected Route - Profile */}
+          <Route
+            path="/signup"
+            element={<PublicRoute element={<Signup />} redirectTo="/" />}
+          />
+          <Route
+            path="/login"
+            element={<PublicRoute element={<Login />} redirectTo="/" />}
+          />
           <Route
             path="/"
-            element={
-              <ProtectedRoute
-                element={<Home />}
-                redirectTo="/login" // Redirect to login if not authenticated
-              />
-            }
+            element={<ProtectedRoute element={<Home />} redirectTo="/login" />}
           />
         </Routes>
       </div>
-    </div>
+    </>
   );
 };
 
