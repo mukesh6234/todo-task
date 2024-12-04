@@ -1,10 +1,11 @@
 body {
-    margin: 0px;
-    min-height: 100vh;
-  }
-  
-  .container {
-    background-color: #ebf5ffcc;
+  margin: 0px;
+  min-height: 100vh;
+  background-color: #ebf5ffcc;
+}
+
+.container {
+    margin: 0px 10px 0px 10px;
     height: 100vh;
   }
   

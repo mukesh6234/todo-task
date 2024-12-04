@@ -142,7 +142,7 @@ const Home: React.FC = () => {
   });
   
   return (
-    <div>
+    <div style={{paddingTop:"10px"}}>
       <Navbar />
       <h1 style={{ textAlign: "center" }}>My Todo List</h1>
       <TableNav
