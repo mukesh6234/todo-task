@@ -16,12 +16,15 @@ interface AuthContextType {
   user: User | null;
   saveUser: (user: User) => void;
   logout: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const userData = localStorage.getItem("userData");
 
   useEffect(() => {
@@ -44,7 +47,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, saveUser, logout }}>
+    <AuthContext.Provider
+      value={{ user, saveUser, logout, isSubmitting, setIsSubmitting }}
+    >
       {children}
     </AuthContext.Provider>
   );

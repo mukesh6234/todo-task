@@ -25,9 +25,8 @@ const Login: React.FC = () => {
     email: "",
     password: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { email, password } = authData;
-  const { saveUser } = useAuth();
+  const { saveUser, isSubmitting, setIsSubmitting } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +44,6 @@ const Login: React.FC = () => {
       localStorage.setItem("userData", JSON.stringify(user));
       saveUser(user);
       navigate("/");
-      setIsSubmitting(false);
     } catch (err) {
       catchBlockError(err);
     } finally {

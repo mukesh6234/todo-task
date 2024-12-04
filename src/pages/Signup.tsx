@@ -5,6 +5,7 @@ import { Button, Card, FormGroup, InputGroup } from "@blueprintjs/core";
 import { api } from "../api/MakeRequest";
 import { showErrorToast, showSuccessToast } from "../components/Toaster";
 import { catchBlockError } from "../utils/helper";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 interface SignResponse {
   message: string;
@@ -28,37 +29,37 @@ const Signup: React.FC = () => {
     email: "",
     password: "",
   });
+  const { isSubmitting, setIsSubmitting } = useAuth();
 
   const { firstName, lastName, email, password } = profileData;
 
   const { saveUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (firstName && lastName && email && password) {
-      const reqBody = {
-        firstName,
-        lastName,
-        email,
-        password,
-      };
-      try {
-        const response = await api.post<SignResponse>(`/auth/signup`, reqBody);
-        console.log(response, "signup");
-        const { token, user } = response;
-        saveUser(user);
-        localStorage.setItem("jwtToken", token);
-        localStorage.setItem("userData", JSON.stringify(user));
-        showSuccessToast(response.message);
-        navigate("/");
-      } catch (err) {
-        catchBlockError(err);
-      }
-    } else {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();     
+    if (!firstName || !lastName || !email || !password) {
       showErrorToast("Invalid credentials");
+      return;
     }
-  }, []);
+    setIsSubmitting(true);
+    try {
+      const response = await api.post<SignResponse>(
+        `/auth/signup`,
+        profileData
+      );
+      const { token, user } = response;
+      saveUser(user);
+      localStorage.setItem("jwtToken", token);
+      localStorage.setItem("userData", JSON.stringify(user));
+      showSuccessToast(response.message);
+      navigate("/");
+    } catch (err) {
+      catchBlockError(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,6 +71,7 @@ const Signup: React.FC = () => {
 
   return (
     <div className="auth-container">
+      {isSubmitting && <LoadingBackdrop />}
       <Card elevation={2} style={{ width: 400 }}>
         <h2>Create New Account</h2>
         <form onSubmit={handleSubmit}>

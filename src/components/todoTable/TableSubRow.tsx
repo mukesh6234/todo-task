@@ -8,6 +8,7 @@ import { TodoResponse } from "../../pages/Home";
 import EditableCell from "../EditableCell";
 import { showErrorToast, showSuccessToast } from "../Toaster";
 import { catchBlockError } from "../../utils/helper";
+import { useAuth } from "../../context/AuthContext";
 
 interface TableSubRowProps<TData extends object> {
   row: Row<TData>;
@@ -15,57 +16,65 @@ interface TableSubRowProps<TData extends object> {
 }
 
 const TableSubRow: React.FC<TableSubRowProps<any>> = ({ row, refetchData }) => {
-  const handleCreateSubTask = useCallback(
-    async (updatedData: Partial<TodoResponse>) => {
-      const { title, status, parentTodoId } = updatedData;
-      if (title && status && parentTodoId) {
-        try {
-          const response = await api.post(`/todos`, updatedData);
-          console.log(response);
-          showSuccessToast("Created Successfully!");
-          refetchData();
-        } catch (err) {
-          catchBlockError(err);
-        }
-      } else {
-        showErrorToast("Invalid Data");
-      }
-    },
-    []
-  );
+  const { setIsSubmitting } = useAuth();
+
+  const handleCreateSubTask = async (updatedData: Partial<TodoResponse>) => {
+    const { title, status, parentTodoId } = updatedData;
+    if (!title || !status || !parentTodoId) {
+      showErrorToast("Invalid Data");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const response = await api.post(`/todos`, updatedData);
+      console.log(response);
+      showSuccessToast("Created Successfully!");
+      refetchData();
+    } catch (err) {
+      catchBlockError(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleUpdateSubTask = useCallback(
     async (id: string, updatedData: Partial<TodoResponse>) => {
       console.log(updatedData, "updatedData");
       const { title, status } = updatedData;
-      if (title && status) {
-        try {
-          const response = await api.put(`/todos/${id}`, updatedData);
-          console.log(response);
-          showSuccessToast("Updated Successfully!");
-          refetchData();
-        } catch (err) {
-          catchBlockError(err);
-        }
-      } else {
+      if (!title || !status) {
         showErrorToast("Invalid Data");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const response = await api.put(`/todos/${id}`, updatedData);
+        console.log(response);
+        showSuccessToast("Updated Successfully!");
+        refetchData();
+      } catch (err) {
+        catchBlockError(err);
+      } finally {
+        setIsSubmitting(false);
       }
     },
     []
   );
 
   const handleRemoveSubTask = useCallback(async (id: string) => {
-    if (id) {
-      try {
-        const response = await api.delete(`/todos/${id}`);
-        console.log(response);
-        showSuccessToast("Removed Successfully!");
-        refetchData();
-      } catch (err) {
-        catchBlockError(err);
-      }
-    } else {
-      showErrorToast("Invalid Task");
+    if (!id) {
+      showErrorToast("Invalid Data");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const response = await api.delete(`/todos/${id}`);
+      console.log(response);
+      showSuccessToast("Removed Successfully!");
+      refetchData();
+    } catch (err) {
+      catchBlockError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   }, []);
 

@@ -21,7 +21,7 @@ const EditableCell: React.FC<EditableCellProps> = ({ value, onSave }) => {
     setIsEditing(false);
   };
 
-  return isEditing ? (
+  return (isEditing || !value) ? (
     <InputGroup
       value={editingValue}
       onChange={(e) => setEditingValue(e.target.value)}
@@ -35,6 +35,7 @@ const EditableCell: React.FC<EditableCellProps> = ({ value, onSave }) => {
       onBlur={() => {
         handleSaveCell();
       }}
+      placeholder="Add a task"
       onKeyDown={(e) => {
         if (e.key === "Enter") {
           handleSaveCell();

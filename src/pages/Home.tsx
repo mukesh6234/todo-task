@@ -8,6 +8,8 @@ import { api } from "../api/MakeRequest";
 import Navbar from "../components/Navbar";
 import { catchBlockError } from "../utils/helper";
 import { showErrorToast, showSuccessToast } from "../components/Toaster";
+import LoadingBackdrop from "../components/LoadingBackdrop";
+import { useAuth } from "../context/AuthContext";
 
 export interface Todo {
   _id: string;
@@ -32,8 +34,11 @@ const Home: React.FC = () => {
   const [todoTask, setTodoTask] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const debouncedQuery = useDebounce(searchValue, 500);
+  const { isSubmitting, setIsSubmitting } = useAuth();
+  const [isFetching, setFetching] = useState<boolean>(false);
 
   useEffect(() => {
+    setFetching(true);
     fetchTodos();
   }, [debouncedQuery]);
 
@@ -43,28 +48,32 @@ const Home: React.FC = () => {
         `/todos?title=${debouncedQuery}`
       );
       setTodos(todosResponse);
+      setFetching(false);
     } catch (err) {
       catchBlockError(err);
     }
   };
 
   const handleCreateTask = useCallback(async () => {
-    if (todoTask) {
-      const reqBody = {
-        title: todoTask,
-        parentTodoId: null,
-      };
-      try {
-        const response = await api.post(`/todos`, reqBody);
-        console.log(response);
-        showSuccessToast("Created Successfully!");
-        fetchTodos();
-        setTodoTask("");
-      } catch (err) {
-        catchBlockError(err);
-      }
-    } else {
+    if (!todoTask) {
       showErrorToast("Invalid Data");
+      return;
+    }
+    setIsSubmitting(true);
+    const reqBody = {
+      title: todoTask,
+      parentTodoId: null,
+    };
+    try {
+      const response = await api.post(`/todos`, reqBody);
+      console.log(response);
+      showSuccessToast("Created Successfully!");
+      fetchTodos();
+      setTodoTask("");
+    } catch (err) {
+      catchBlockError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   }, [todoTask]);
 
@@ -72,34 +81,40 @@ const Home: React.FC = () => {
     async (id: string, updatedData: Partial<TodoResponse>) => {
       console.log(updatedData, "updatedData");
       const { title, status } = updatedData;
-      if (title && status) {
-        try {
-          const response = await api.put(`/todos/${id}`, updatedData);
-          console.log(response);
-          showSuccessToast("Updated Successfully!");
-          fetchTodos();
-        } catch (err) {
-          catchBlockError(err);
-        }
-      } else {
+      if (!title || !status) {
         showErrorToast("Invalid Data");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const response = await api.put(`/todos/${id}`, updatedData);
+        console.log(response);
+        showSuccessToast("Updated Successfully!");
+        fetchTodos();
+      } catch (err) {
+        catchBlockError(err);
+      } finally {
+        setIsSubmitting(false);
       }
     },
     []
   );
 
   const handleRemoveTask = useCallback(async (id: string) => {
-    if (id) {
-      try {
-        const response = await api.delete(`/todos/${id}`);
-        console.log(response);
-        showSuccessToast("Removed Successfully!");
-        fetchTodos();
-      } catch (err) {
-        catchBlockError(err);
-      }
-    } else {
-      showErrorToast("Invalid Task");
+    if (!id) {
+      showErrorToast("Invalid Data");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const response = await api.delete(`/todos/${id}`);
+      console.log(response);
+      showSuccessToast("Removed Successfully!");
+      fetchTodos();
+    } catch (err) {
+      catchBlockError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   }, []);
 
@@ -121,7 +136,7 @@ const Home: React.FC = () => {
                 ...(todo.childrenIds || []),
                 {
                   _id: `temp-${Date.now()}`,
-                  title: "New Sub Task",
+                  title: "",
                   status: "Pending",
                   parentTodoId: parentId,
                   childrenIds: [],
@@ -140,9 +155,10 @@ const Home: React.FC = () => {
     getCoreRowModel: getCoreRowModel(),
     getSubRows: (row) => row.childrenIds || [],
   });
-  
+
   return (
-    <div style={{paddingTop:"10px"}}>
+    <div style={{ paddingTop: "10px" }}>
+      {(isFetching || isSubmitting) && <LoadingBackdrop />}
       <Navbar />
       <h1 style={{ textAlign: "center" }}>My Todo List</h1>
       <TableNav
