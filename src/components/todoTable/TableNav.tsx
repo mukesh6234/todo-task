@@ -18,7 +18,7 @@ const TableNav: React.FC<TableNavProps> = ({
 }) => {
   return (
     <div className="table-input-header">
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10,width:"100%" }}>
         <InputGroup
           id="create-task"
           placeholder="Create a new todo"

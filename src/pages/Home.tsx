@@ -66,7 +66,7 @@ const Home: React.FC = () => {
     } else {
       showErrorToast("Invalid Data");
     }
-  }, []);
+  }, [todoTask]);
 
   const handleUpdateTask = useCallback(
     async (id: string, updatedData: Partial<TodoResponse>) => {
