@@ -49,3 +49,15 @@ tfoot th {
   transform: translate(-50%, -50%);
   position: fixed !important;
 }
+
+.editable-cell-input {
+  border: none !important; 
+  box-shadow: none !important; 
+  background-color: transparent; 
+  transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.editable-cell-input.bp3-input:focus {
+  border: 2px solid #137cbd !important; 
+  box-shadow: 0 0 5px #137cbd !important; 
+}

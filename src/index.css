@@ -5,49 +5,60 @@ body {
 }
 
 .container {
-    margin: 0px 10px 0px 10px;
-    height: 100vh;
-  }
-  
-  .auth-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  table {
-    border: 1px solid lightgray;
-  }
-  
-  tbody {
-    border-bottom: 1px solid lightgray;
-  }
-  
-  th {
-    border-bottom: 1px solid lightgray;
-    border-right: 1px solid lightgray;
-    padding: 2px 4px;
-  }
-  
-  tfoot {
-    color: gray;
-  }
-  
-  tfoot th {
-    font-weight: normal;
-  }
-  
-  .table-input-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .my-toaster.bp4-toast-container {
-    top: 50% !important;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    position: fixed !important;
-  }
-  
+  margin: 0px 10px 0px 10px;
+  height: 100vh;
+}
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+table {
+  border: 1px solid lightgray;
+}
+
+tbody {
+  border-bottom: 1px solid lightgray;
+}
+
+th {
+  border-bottom: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+  padding: 2px 4px;
+}
+
+tfoot {
+  color: gray;
+}
+
+tfoot th {
+  font-weight: normal;
+}
+
+.table-input-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.my-toaster.bp4-toast-container {
+  top: 50% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: fixed !important;
+}
+
+.editable-cell-input {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent;
+  transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.editable-cell-input.bp3-input:focus {
+  border: 2px solid #137cbd !important;
+  box-shadow: 0 0 5px #137cbd !important;
+}
